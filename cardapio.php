@@ -1,208 +1,390 @@
-<?php
-// Conexão com banco de dados
-$conn = new mysqli("localhost", "root", "", "cardapio");
-$result = $conn->query("SELECT * FROM pratos");
+<?php 
+  $servidor = "localhost";
+  $usuario = "root";
+  $senha = "";
+  $banco = "cardapio";
+
+  $conexao = mysqli_connect($servidor, $usuario, $senha, $banco);
+  if (!$conexao) {
+    die("Erro ao conectar: " . mysqli_connect_error());
+  }
+
+  $sql = "SELECT * FROM pratos";
+  $resultado = mysqli_query($conexao, $sql);
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
-  <title>Cardápio - BataHones</title>
+  <title>Cardápio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #742f1c;
-      color: #fff;
       font-family: 'Segoe UI', sans-serif;
+      background-color: #642c10;
+      margin: 0;
+      padding: 0;
     }
 
-    .header {
-      background-color: #5b2314;
-      padding: 1rem 3.5rem 1rem 1rem;
-      color: #f8c33a;
+    header {
+      background-color: #5a200b;
+      color: #f7b731;
+      padding: 16px;
+      text-align: center;
+      font-size: 20px;
       font-weight: bold;
-      font-size: 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .header .back-arrow {
-      color: #fff;
-      font-size: 1.5rem;
-      text-decoration: none;
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .header .cart-btn {
-      color: #fff;
-      font-size: 1.5rem;
+    .back-button, .cart-button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #f7b731;
+      cursor: pointer;
       position: relative;
     }
 
-    .header .cart-count {
+    .cart-count {
       position: absolute;
-      top: -8px;
-      right: -10px;
-      background-color: red;
+      top: -6px;
+      right: -6px;
+      background: red;
       color: white;
-      border-radius: 50%;
-      font-size: 0.75rem;
+      font-size: 12px;
       padding: 2px 6px;
+      border-radius: 50%;
     }
 
-    .search-bar {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      margin: 1rem 0;
+    .container {
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
-    .card-item {
-      background-color: #fff;
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      color: #333;
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 20px;
+      border: none;
+      font-size: 16px;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .card {
       display: flex;
       justify-content: space-between;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      background-color: #fff;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .card-item img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
+    .info {
+      flex: 1 1 200px;
+    }
+
+    .info h3 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      color: #4b1d0c;
+    }
+
+    .info p {
+      margin: 0 0 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .precos {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .preco {
+      background: #fff3e0;
+      padding: 6px 10px;
       border-radius: 10px;
-      margin-left: 1rem;
+      font-size: 13px;
+      border: 1px solid #f0d2a0;
+      cursor: pointer;
     }
 
-    .item-info {
-      flex-grow: 1;
+    .preco:hover {
+      background: #f7b731;
+      color: white;
     }
 
-    .item-info h5 {
-      font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 0.3rem;
+    .imagem img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid #fff;
     }
 
-    .item-info p {
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .item-info .preco {
-      font-weight: bold;
-      color: #742f1c;
-    }
-
-    @media (max-width: 576px) {
-      .card-item {
-        flex-direction: column;
-        text-align: center;
+    @media (max-width: 600px) {
+      .card {
+        flex-direction: row;
         align-items: center;
       }
 
-      .card-item img {
-        margin: 1rem 0 0;
+      .info {
+        order: 1;
+        flex: 1;
+      }
+
+      .imagem {
+        order: 2;
+      }
+
+      .imagem img {
+        width: 100px;
+        height: auto;
       }
     }
 
-    .btn-add {
-      background-color: #f8c33a;
-      color: #742f1c;
-      font-weight: bold;
-      border: none;
-      margin-top: 0.5rem;
+    .modal-content {
+      background-color: #fffaf2;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      animation: slideDown 0.3s ease forwards;
     }
 
-    .offcanvas-body ul {
-      padding-left: 1rem;
+    #cartList {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    #cartList li {
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #cartList li strong {
+      font-size: 16px;
+      color: #2c3e50;
+    }
+
+    #cartList li span {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .item-actions {
+      display: flex;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .item-actions button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .item-actions button svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .item-actions button:hover {
+      transform: scale(1.2);
+    }
+
+    .whatsapp-btn {
+      background-color: #25D366;
+      color: white;
+      padding: 14px 22px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+    }
+
+    .whatsapp-btn:hover {
+      background-color: #1ebe5d;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <a href="index.php" class="back-arrow"><i class="fas fa-arrow-left"></i></a>
-    BataHones Cardápio
-    <a href="#" class="cart-btn" data-bs-toggle="offcanvas" data-bs-target="#carrinhoOffcanvas">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="cart-count" id="cart-count">0</span>
-    </a>
-  </div>
+  <header>
+    <div class="header-left">
+      <button class="back-button" onclick="window.location.href='index.php'">&#8592;</button>
+      BataHones Cardápio
+    </div>
+    <button class="cart-button" onclick="openCart()">
+      🛒 <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </header>
 
-  <div class="container mt-2">
-    <div class="search-bar">
-      <input type="text" id="searchInput" class="form-control" placeholder="Buscar item...">
+  <div class="container">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Buscar item...">
     </div>
 
-    <div id="itensContainer">
-      <?php while ($row = $result->fetch_assoc()): ?>
-        <div class="card-item" data-nome="<?= strtolower($row['nome']) ?>">
-          <div class="item-info">
-            <h5><?= $row['nome'] ?></h5>
-            <p><?= $row['ingredientes'] ?></p>
-            <div class="preco">R$ <?= number_format($row['preco'], 2, ',', '.') ?></div>
-            <button class="btn btn-add btn-sm" onclick="adicionarCarrinho('<?= $row['nome'] ?>', <?= $row['preco'] ?>)">Adicionar</button>
+    <?php while ($linha = mysqli_fetch_assoc($resultado)) { ?>
+      <div class="card">
+        <div class="info">
+          <h3><?php echo $linha['nome']; ?></h3>
+          <p><?php echo $linha['ingredientes']; ?></p>
+          <div class="precos">
+            <div class="preco" onclick="addToCart('<?php echo $linha['nome']; ?>', 'Pequeno', <?php echo $linha['preco_p']; ?>)">
+              <span>PEQUENO</span><br><strong>R$ <?php echo number_format($linha['preco_p'], 2, ',', '.'); ?></strong>
+            </div>
+            <div class="preco" onclick="addToCart('<?php echo $linha['nome']; ?>', 'Médio', <?php echo $linha['preco_m']; ?>)">
+              <span>MÉDIO</span><br><strong>R$ <?php echo number_format($linha['preco_m'], 2, ',', '.'); ?></strong>
+            </div>
           </div>
-          <img src="data:image/jpeg;base64,<?= base64_encode($row['img']) ?>" alt="<?= $row['nome'] ?>">
         </div>
-      <?php endwhile; ?>
+        <div class="imagem">
+          <img src="mostrar_imagem.php?id=<?php echo $linha['id']; ?>" alt="Imagem do prato">
+        </div>
+      </div>
+    <?php } ?>
+  </div>
+
+  <!-- Modal do Carrinho -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCart()">&times;</span>
+      <h3>Itens no Carrinho</h3>
+      <ul id="cartList"></ul>
+
+      <div class="cart-actions">
+        <button class="whatsapp-btn" onclick="enviarPedidoWhatsApp()">Finalizar Pedido no WhatsApp</button>
+      </div>
     </div>
   </div>
 
-  <!-- Carrinho -->
-  <div class="offcanvas offcanvas-end" tabindex="-1" id="carrinhoOffcanvas" aria-labelledby="carrinhoLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="carrinhoLabel">Carrinho</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
-    </div>
-    <div class="offcanvas-body">
-      <ul id="carrinhoItens" class="list-unstyled"></ul>
-      <hr>
-      <strong>Total: R$ <span id="total">0,00</span></strong>
-    </div>
-  </div>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const carrinho = [];
-    const carrinhoLista = document.getElementById("carrinhoItens");
-    const totalEl = document.getElementById("total");
-    const cartCount = document.getElementById("cart-count");
+    let cart = [];
 
-    function adicionarCarrinho(nome, preco) {
-      carrinho.push({ nome, preco });
-      renderCarrinho();
-    }
-
-    function renderCarrinho() {
-      carrinhoLista.innerHTML = "";
-      let total = 0;
-      carrinho.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = `${item.nome} - R$ ${item.preco.toFixed(2).replace('.', ',')}`;
-        carrinhoLista.appendChild(li);
-        total += item.preco;
+    function addToCart(nome, tamanho, preco) {
+      cart.push({
+        nome,
+        tamanho,
+        preco
       });
-      totalEl.textContent = total.toFixed(2).replace('.', ',');
-      cartCount.textContent = carrinho.length;
+      updateCartUI();
     }
 
-    document.getElementById("searchInput").addEventListener("input", function () {
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const cartList = document.getElementById("cartList");
+      const cartCount = document.getElementById("cartCount");
+      cartList.innerHTML = '';
+      cart.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+  <div>
+    <strong>${item.nome}</strong> <span>- ${item.tamanho} - R$ ${item.preco.toFixed(2)}</span>
+  </div>
+  <div class="item-actions">
+    <button onclick="addToCart('${item.nome}', '${item.tamanho}', ${item.preco})" title="Adicionar novamente">
+      <svg viewBox="0 0 24 24" fill="#27ae60" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+    <button onclick="removeFromCart(${index})" title="Remover item">
+      <svg viewBox="0 0 24 24" fill="#e74c3c" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+`;
+
+        cartList.appendChild(li);
+      });
+      cartCount.textContent = cart.length;
+    }
+
+    function openCart() {
+      document.getElementById("cartModal").style.display = "block";
+    }
+
+    function closeCart() {
+      document.getElementById("cartModal").style.display = "none";
+    }
+
+    function enviarPedidoWhatsApp() {
+      if (cart.length === 0) {
+        alert("Seu carrinho está vazio.");
+        return;
+      }
+
+      let mensagem = "Pedido:\n";
+      cart.forEach(item => {
+        mensagem += `• ${item.nome} - ${item.tamanho} - R$ ${item.preco.toFixed(2)}\n`;
+      });
+
+      const numero = "5515996684528";
+      const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, "_blank");
+    }
+
+    // Busca funcional
+    document.getElementById("searchInput").addEventListener("input", function() {
       const termo = this.value.toLowerCase();
-      document.querySelectorAll(".card-item").forEach(item => {
-        const nome = item.getAttribute("data-nome");
-        item.style.display = nome.includes(termo) ? "flex" : "none";
+      const cards = document.querySelectorAll(".card");
+
+      cards.forEach(card => {
+        const nome = card.querySelector(".info h3").textContent.toLowerCase();
+        const ingredientes = card.querySelector(".info p").textContent.toLowerCase();
+
+        if (nome.includes(termo) || ingredientes.includes(termo)) {
+          card.style.display = "flex";
+        } else {
+          card.style.display = "none";
+        }
       });
     });
   </script>
 
 </body>
+
 </html>
